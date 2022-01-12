@@ -3,9 +3,10 @@ import {
   SET_LOADING,
   PLAYER_WON,
   PLAYER_LOST,
+  REVEAL_COMPUTER_SCORE,
 } from "./types/types";
 
-export default (state, action) => {
+export const gameReducer = (state, action) => {
   switch (action.type) {
     case START_GAME:
       return {
@@ -21,6 +22,7 @@ export default (state, action) => {
         computerDeck: state.computerDeck.filter(
           (starship) => starship.name !== action.payload
         ),
+        chosenStat: null,
         loading: true,
       };
     case PLAYER_LOST:
@@ -30,6 +32,7 @@ export default (state, action) => {
         playerDeck: state.playerDeck.filter(
           (starship) => starship.name !== action.payload
         ),
+        chosenStat: null,
         loading: true,
       };
     case SET_LOADING:
@@ -37,15 +40,10 @@ export default (state, action) => {
         ...state,
         loading: true,
       };
-    case SET_LOADING:
+    case REVEAL_COMPUTER_SCORE:
       return {
         ...state,
-        loading: true,
-      };
-
-    case SET_LOADING:
-      return {
-        ...state,
+        chosenStat: action.payload,
         loading: true,
       };
     default:

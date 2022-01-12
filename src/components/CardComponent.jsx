@@ -13,7 +13,6 @@ import SnackbarComponent from "./SnackBarComponent";
 import logo from "../images/logo.png";
 
 const CardComponent = ({ data, player }) => {
-  const [touched, setTouched] = useState(false);
   const [openWinSnackbar, setOpenWinSnackbar] = useState(false);
   const [openLoseSnackbar, setOpenLoseSnackbar] = useState(false);
   const [openDrawSnackbar, setOpenDrawSnackbar] = useState(false);
@@ -23,23 +22,39 @@ const CardComponent = ({ data, player }) => {
   const onClickStatistic = (e) => {
     let playerCard = gameContext.playerDeck[0];
     let computerCard = gameContext.computerDeck[0];
-    if (playerCard[e.target.name] > computerCard[e.target.name]) {
+    if (
+      parseInt(playerCard[e.target.name]) >
+      parseInt(computerCard[e.target.name])
+    ) {
       setOpenWinSnackbar(true);
-      gameContext.updateScore("success", computerCard["name"]);
+      gameContext.revealComputerStatistic(e.target.name);
+      setTimeout(() => {
+        gameContext.updateScore("success", computerCard["name"]);
+      }, 2500);
     }
-    if (playerCard[e.target.name] < computerCard[e.target.name]) {
+    if (
+      parseInt(playerCard[e.target.name]) <
+      parseInt(computerCard[e.target.name])
+    ) {
+      gameContext.revealComputerStatistic(e.target.name);
       setOpenLoseSnackbar(true);
-      gameContext.updateScore("lost", playerCard["name"]);
+      setTimeout(() => {
+        gameContext.updateScore("lost", playerCard["name"]);
+      }, 2500);
     }
     if (playerCard[e.target.name] === computerCard[e.target.name]) {
+      gameContext.revealComputerStatistic(e.target.name);
       setOpenDrawSnackbar(true);
+      setTimeout(() => {
+        gameContext.updateScore("draw", playerCard["name"]);
+      }, 2500);
     }
   };
 
   return (
     <>
       <Card sx={{ bgcolor: "#E1D9D1", maxWidth: "500px" }} elevation={3}>
-        <CardHeader sx={{ bgcolor: "#FFC625" }} title={data[0].name} />
+        <CardHeader sx={{ bgcolor: "#FFC625" }} title={data[0]?.name} />
         <CardMedia component="img" image={logo} height="220" />
         <CardContent>
           <Box>
@@ -50,10 +65,15 @@ const CardComponent = ({ data, player }) => {
                   fullWidth
                   variant="outlined"
                   name="max_atmosphering_speed"
+                  disabled={
+                    data[0]?.max_atmosphering_speed === "unknown" ||
+                    data[0]?.max_atmosphering_speed === "n/a"
+                  }
                 >
-                  {!player && !touched
+                  {gameContext.chosenStat !== "max_atmosphering_speed" &&
+                  !player
                     ? "?"
-                    : `Max Speed: ${data[0].max_atmosphering_speed}`}
+                    : `Max Speed: ${data[0]?.max_atmosphering_speed}`}
                 </Button>
               </Grid>
               <Grid item xs={12}>
@@ -61,23 +81,31 @@ const CardComponent = ({ data, player }) => {
                   name="cost_in_credits"
                   onClick={onClickStatistic}
                   fullWidth
+                  disabled={
+                    data[0]?.cost_in_credits === "unknown" ||
+                    data[0]?.cost_in_credits === "n/a"
+                  }
                   variant="outlined"
                 >
-                  {!player && !touched
+                  {gameContext.chosenStat !== "cost_in_credits" && !player
                     ? "?"
-                    : `Cost In Credits: ${data[0].cost_in_credits}`}
+                    : `Cost In Credits: ${data[0]?.cost_in_credits}`}
                 </Button>
               </Grid>
               <Grid item xs={12}>
                 <Button
                   onClick={onClickStatistic}
                   name="passengers"
+                  disabled={
+                    data[0]?.passengers === "unknown" ||
+                    data[0]?.passengers === "n/a"
+                  }
                   fullWidth
                   variant="outlined"
                 >
-                  {!player && !touched
+                  {gameContext.chosenStat !== "passengers" && !player
                     ? "?"
-                    : `Passengers: ${data[0].passengers}`}
+                    : `passengers: ${data[0]?.passengers}`}
                 </Button>
               </Grid>
               <Grid item xs={12}>
@@ -86,10 +114,13 @@ const CardComponent = ({ data, player }) => {
                   fullWidth
                   name="crew"
                   variant="outlined"
+                  disabled={
+                    data[0]?.crew === "unknown" || data[0]?.crew === "n/a"
+                  }
                 >
-                  {!player && !touched
+                  {gameContext.chosenStat !== "crew" && !player
                     ? "?"
-                    : `Number Of Crew: ${data[0].crew}`}
+                    : `Crew: ${data[0]?.crew}`}
                 </Button>
               </Grid>
             </Grid>
@@ -99,7 +130,6 @@ const CardComponent = ({ data, player }) => {
       <SnackbarComponent
         open={openWinSnackbar}
         message="You won this hand!"
-        autoHideDuration={2000}
         severity="success"
         handleClose={() => setOpenWinSnackbar(false)}
       />
@@ -107,12 +137,11 @@ const CardComponent = ({ data, player }) => {
         open={openLoseSnackbar}
         message="You lost this hand!"
         severity="error"
-        autoHideDuration={2000}
         handleClose={() => setOpenLoseSnackbar(false)}
       />
       <SnackbarComponent
         open={openDrawSnackbar}
-        message="Draw!"
+        message="Draw! Pick another category."
         severity="warning"
         handleClose={() => setOpenDrawSnackbar(false)}
       />

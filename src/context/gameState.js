@@ -1,5 +1,5 @@
 import React, { useReducer } from "react";
-import GameReducer from "./gameReducer";
+import { gameReducer } from "./gameReducer";
 import { deckShuffle } from "../util/UtilFunctions";
 import { getStarWarsTopTrumpData } from "../api/useGetStarWarsTopTrumpsData";
 import {
@@ -8,6 +8,7 @@ import {
   PLAYER_WON,
   PLAYER_LOST,
   PLAYER_DRAW,
+  REVEAL_COMPUTER_SCORE,
 } from "./types/types";
 import GameContext from "./gameContext";
 
@@ -17,10 +18,11 @@ const GameState = (props) => {
     computerDeck: [],
     playerScore: 0,
     computerScore: 0,
+    chosenStat: "",
     loading: false,
   };
 
-  const [state, dispatch] = useReducer(GameReducer, initialState);
+  const [state, dispatch] = useReducer(gameReducer, initialState);
 
   const setLoading = () => dispatch({ type: SET_LOADING });
 
@@ -32,6 +34,14 @@ const GameState = (props) => {
     dispatch({
       type: START_GAME,
       payload: response,
+    });
+  };
+
+  const revealComputerStatistic = (statName) => {
+    setLoading();
+    dispatch({
+      type: REVEAL_COMPUTER_SCORE,
+      payload: statName,
     });
   };
 
@@ -49,6 +59,7 @@ const GameState = (props) => {
           payload: starshipName,
         });
         break;
+
       default:
         dispatch({
           type: PLAYER_DRAW,
@@ -64,9 +75,11 @@ const GameState = (props) => {
         computerDeck: state.computerDeck,
         playerScore: state.playerScore,
         computerScore: state.computerScore,
+        chosenStat: state.chosenStat,
         loading: state.loading,
         startGame,
         updateScore,
+        revealComputerStatistic,
       }}
     >
       {props.children}
